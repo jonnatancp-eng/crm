@@ -75,7 +75,7 @@ export interface LeadWithOwner extends Lead {
   owner?: User | null
 }
 
-export interface LeadWithDetails extends LeadWithOwner {
+export interface LeadWithDetails extends Omit<LeadWithOwner, 'notes'> {
   tasks?: Task[]
   notes?: Note[]
   deals?: Deal[]

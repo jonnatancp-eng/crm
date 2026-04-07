@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { insforge } from '@/lib/insforge'
+import { setAuthCookiesAction } from '@/app/actions/auth'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -36,18 +37,23 @@ export default function LoginPage() {
           setShowOtp(true)
         } else if (data?.accessToken) {
           // User is signed in
-          router.push('/dashboard')
+          await setAuthCookiesAction(data.accessToken, data.refreshToken)
+          router.push('/')
         }
       } else {
         // Sign in
-        const { error: signInError } = await insforge.auth.signInWithPassword({
+        const { data, error: signInError } = await insforge.auth.signInWithPassword({
           email,
           password,
         })
 
         if (signInError) throw signInError
 
-        router.push('/dashboard')
+        if (data?.accessToken) {
+          await setAuthCookiesAction(data.accessToken, data.refreshToken)
+        }
+
+        router.push('/')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Authentication failed')
@@ -62,14 +68,18 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const { error: verifyError } = await insforge.auth.verifyEmail({
+      const { data, error: verifyError } = await insforge.auth.verifyEmail({
         email,
         otp,
       })
 
       if (verifyError) throw verifyError
 
-      router.push('/dashboard')
+      if (data?.accessToken) {
+        await setAuthCookiesAction(data.accessToken, data.refreshToken)
+      }
+
+      router.push('/')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Verification failed')
     } finally {
@@ -81,7 +91,7 @@ export default function LoginPage() {
     try {
       await insforge.auth.signInWithOAuth({
         provider: 'google',
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/callback`,
       })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Google sign in failed')
@@ -92,7 +102,7 @@ export default function LoginPage() {
     try {
       await insforge.auth.signInWithOAuth({
         provider: 'facebook',
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/callback`,
       })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Facebook sign in failed')

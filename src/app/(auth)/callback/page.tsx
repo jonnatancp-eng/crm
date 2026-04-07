@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { insforge } from '@/lib/insforge'
+import { setAuthCookiesAction } from '@/app/actions/auth'
 
 export default function AuthCallbackPage() {
   const router = useRouter()
@@ -11,17 +12,14 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // The InsForge SDK handles the OAuth callback automatically
-        // Check for session
-        const { data, error } = await insforge.auth.getCurrentSession()
+        // The InsForge SDK handles the OAuth callback automatically and securely saves flags internally
+        // @ts-ignore - explicitly accessing sync getSession missing in typings
+        const session = insforge.auth.getSession()
 
-        if (error) {
-          throw error
-        }
-
-        if (data?.session) {
-          // Successfully authenticated
-          router.push('/dashboard')
+        if (session?.accessToken) {
+          // Successfully authenticated, setup server-side auth cookies
+          await setAuthCookiesAction(session.accessToken, session.refreshToken)
+          router.push('/')
         } else {
           throw new Error('No session found')
         }

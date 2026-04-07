@@ -27,7 +27,7 @@ interface DashboardLayoutProps {
 }
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Pipeline', href: '/pipeline', icon: Kanban },
   { name: 'Leads', href: '/leads', icon: Users },
   { name: 'Tareas', href: '/tasks', icon: CheckSquare },

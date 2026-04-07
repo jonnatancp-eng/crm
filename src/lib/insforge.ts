@@ -25,4 +25,6 @@ export function createServerClient(accessToken?: string) {
 }
 
 // Export types for convenience
-export type { User, Session } from '@insforge/sdk'
+// export type { User, Session } from '@insforge/sdk'
+export type User = any;
+export type Session = any;

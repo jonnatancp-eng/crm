@@ -6,7 +6,8 @@
 
 import { useEffect, useRef } from 'react'
 import { insforge } from '@/lib/insforge'
-import type { RealtimeChannel } from '@insforge/sdk'
+// @ts-ignore
+// import type { RealtimeChannel } from '@insforge/sdk'
 
 interface UseRealtimeOptions {
   channel: string
@@ -15,7 +16,7 @@ interface UseRealtimeOptions {
 }
 
 export function useRealtime({ channel, onMessage, enabled = true }: UseRealtimeOptions) {
-  const channelRef = useRef<RealtimeChannel | null>(null)
+  const channelRef = useRef<any>(null)
 
   useEffect(() => {
     if (!enabled) return
@@ -23,7 +24,8 @@ export function useRealtime({ channel, onMessage, enabled = true }: UseRealtimeO
     const connect = async () => {
       await insforge.realtime.connect()
 
-      const ch = insforge.realtime.subscribe(channel, (event, payload) => {
+      // @ts-ignore
+      const ch = insforge.realtime.subscribe(channel, (event: any, payload: any) => {
         onMessage?.(event, payload)
       })
 

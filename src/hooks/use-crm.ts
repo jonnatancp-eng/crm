@@ -225,40 +225,40 @@ export function usePipeline() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchPipeline = async () => {
-      setLoading(true)
-      try {
-        const { data: result, error: err } = await insforge.database
-          .from('deals')
-          .select(`
-            *,
-            owner:users!deals_owner_id_fkey(id, name, avatar_url, role),
-            lead:leads(id, name, email, company)
-          `)
-          .order('created_at', { ascending: false })
+  const fetchPipeline = useCallback(async () => {
+    setLoading(true)
+    try {
+      const { data: result, error: err } = await insforge.database
+        .from('deals')
+        .select(`
+          *,
+          owner:users!deals_owner_id_fkey(id, name, avatar_url, role),
+          lead:leads(id, name, email, company)
+        `)
+        .order('created_at', { ascending: false })
 
-        if (err) throw err
+      if (err) throw err
 
-        // Group by stage
-        const grouped = (result as DealWithOwner[]).reduce((acc, deal) => {
-          if (!acc[deal.stage]) acc[deal.stage] = []
-          acc[deal.stage].push(deal)
-          return acc
-        }, {} as Record<string, DealWithOwner[]>)
+      // Group by stage
+      const grouped = (result as DealWithOwner[]).reduce((acc, deal) => {
+        if (!acc[deal.stage]) acc[deal.stage] = []
+        acc[deal.stage].push(deal)
+        return acc
+      }, {} as Record<string, DealWithOwner[]>)
 
-        setData(grouped)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error fetching pipeline')
-      } finally {
-        setLoading(false)
-      }
+      setData(grouped)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error fetching pipeline')
+    } finally {
+      setLoading(false)
     }
-
-    fetchPipeline()
   }, [])
 
-  return { data, loading, error }
+  useEffect(() => {
+    fetchPipeline()
+  }, [fetchPipeline])
+
+  return { data, loading, error, refetch: fetchPipeline }
 }
 
 export function useDealMutations() {

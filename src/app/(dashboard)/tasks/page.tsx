@@ -202,7 +202,7 @@ function TaskCard({ task, onComplete, onDelete }: TaskCardProps) {
 
             {/* Due date */}
             {task.due_at && (
-              <span className={cn(isOverdue && 'text-red-600')}>
+              <span className={cn(isOverdue ? 'text-red-600' : undefined)}>
                 {formatRelativeDate(task.due_at)}
               </span>
             )}

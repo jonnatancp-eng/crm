@@ -44,14 +44,14 @@ export async function signIn(email: string, password: string) {
 export async function signInWithGoogle(redirectTo?: string) {
   await insforge.auth.signInWithOAuth({
     provider: 'google',
-    redirectTo: redirectTo || `${window.location.origin}/auth/callback`,
+    redirectTo: redirectTo || `${window.location.origin}/callback`,
   })
 }
 
 export async function signInWithFacebook(redirectTo?: string) {
   await insforge.auth.signInWithOAuth({
     provider: 'facebook',
-    redirectTo: redirectTo || `${window.location.origin}/auth/callback`,
+    redirectTo: redirectTo || `${window.location.origin}/callback`,
   })
 }
 
@@ -61,9 +61,9 @@ export async function signOut() {
 }
 
 export async function getCurrentSession() {
-  const { data, error } = await insforge.auth.getCurrentSession()
-  if (error) return null
-  return data?.session || null
+  const { data, error } = await insforge.auth.getCurrentUser()
+  if (error || !data?.user) return null
+  return { user: data.user, accessToken: '' }
 }
 
 export async function getCurrentUser(): Promise<User | null> {
@@ -92,10 +92,10 @@ export async function getServerSession() {
   if (!accessToken) return null
 
   const client = createServerClient(accessToken)
-  const { data, error } = await client.auth.getCurrentSession()
+  const { data, error } = await client.auth.getCurrentUser()
 
-  if (error) return null
-  return data?.session || null
+  if (error || !data?.user) return null
+  return { user: data.user, accessToken }
 }
 
 export async function getServerUser(): Promise<(User & { tenant: Tenant }) | null> {
