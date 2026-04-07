@@ -1,28 +1,33 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { insforge } from '@/lib/insforge'
-import { setAuthCookiesAction } from '@/app/actions/auth'
 
 export default function AuthCallbackPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // The InsForge SDK handles the OAuth callback automatically and securely saves flags internally
-        // @ts-ignore - explicitly accessing sync getSession missing in typings
-        const session = insforge.auth.getSession()
-
-        if (session?.accessToken) {
-          // Successfully authenticated, setup server-side auth cookies
-          await setAuthCookiesAction(session.accessToken, session.refreshToken)
-          router.push('/')
-        } else {
-          throw new Error('No session found')
+        // Check for OAuth error in URL
+        const errorParam = searchParams.get('error')
+        if (errorParam) {
+          throw new Error(`Authentication error: ${errorParam}`)
         }
+
+        // Get current user from InsForge (SDK reads cookies automatically)
+        const { data, error: userError } = await insforge.auth.getCurrentUser()
+
+        if (userError || !data?.user) {
+          throw new Error('No session found after OAuth callback')
+        }
+
+        // Successfully authenticated - redirect to dashboard
+        // The SDK already saved tokens in cookies
+        router.push('/')
       } catch (err) {
         console.error('Auth callback error:', err)
         setError(err instanceof Error ? err.message : 'Authentication failed')
@@ -34,7 +39,7 @@ export default function AuthCallbackPage() {
     }
 
     handleCallback()
-  }, [router])
+  }, [router, searchParams])
 
   if (error) {
     return (
