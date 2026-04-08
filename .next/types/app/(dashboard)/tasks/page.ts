@@ -1,8 +1,8 @@
 // File: C:\Users\JONN\Documents\Jonnatan\Jonnatan\IA Agency\crm\src\app\(dashboard)\tasks\page.tsx
-import * as entry from '../../../../../src/app/(dashboard)/tasks/page.js'
+import * as entry from '../../../../../src/app/dashboard/tasks/page.jsx'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
-type TEntry = typeof import('../../../../../src/app/(dashboard)/tasks/page.js')
+type TEntry = typeof import('../../../../../src/app/dashboard/tasks/page.jsx')
 
 // Check that the entry is a valid entry
 checkFields<Diff<{
