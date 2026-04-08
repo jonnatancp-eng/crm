@@ -164,7 +164,21 @@ export function Dashboard({ tenantId }: DashboardProps) {
 
 // ---------------- COMPONENTES ----------------
 
-function StatCard({ title, value, subtitle, icon: Icon, color }) {
+type StatCardProps = {
+  title: string
+  value: string
+  subtitle: string
+  icon: React.ComponentType<{ className?: string }>
+  color: 'blue' | 'green' | 'purple' | 'yellow'
+}
+
+function StatCard({
+  title,
+  value,
+  subtitle,
+  icon: Icon,
+  color,
+}: StatCardProps) {
   const colors = {
     blue: 'bg-blue-50 text-blue-600',
     green: 'bg-green-50 text-green-600',
