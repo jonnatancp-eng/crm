@@ -2,9 +2,9 @@
   "/_not-found/page": "app/_not-found/page.js",
   "/page": "app/page.js",
   "/(auth)/callback/page": "app/(auth)/callback/page.js",
-  "/(dashboard)/tasks/page": "app/(dashboard)/tasks/page.js",
   "/(auth)/login/page": "app/(auth)/login/page.js",
-  "/(dashboard)/leads/page": "app/(dashboard)/leads/page.js",
-  "/(dashboard)/pipeline/page": "app/(dashboard)/pipeline/page.js",
-  "/(dashboard)/page": "app/(dashboard)/page.js"
+  "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/leads/page": "app/dashboard/leads/page.js",
+  "/dashboard/pipeline/page": "app/dashboard/pipeline/page.js",
+  "/dashboard/tasks/page": "app/dashboard/tasks/page.js"
 }
