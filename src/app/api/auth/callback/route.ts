@@ -3,13 +3,17 @@ import { cookies } from 'next/headers'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
+  
+  // Debug: log TODO lo que llega
+  const allParams = Object.fromEntries(searchParams.entries())
+  console.log('🔥 CALLBACK DEBUG - ALL PARAMS:', JSON.stringify(allParams, null, 2))
+  console.log('🔥 FULL URL:', request.url)
+  
   const insforgeCode = searchParams.get('insforge_code')
+  const code = searchParams.get('code')
   const error = searchParams.get('error')
 
-  console.log('OAuth Callback:', {
-    insforgeCode: insforgeCode ? insforgeCode.substring(0, 20) + '...' : null,
-    error,
-  })
+  console.log('🔥 PARSED:', { insforgeCode, code, error })
 
   if (error) {
     console.error('OAuth error:', error)
@@ -18,15 +22,20 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  if (!insforgeCode) {
-    console.error('No insforge_code in callback')
+  // Try insforge_code first, then code
+  const authCode = insforgeCode || code
+
+  if (!authCode) {
+    console.error('❌ NO CODE FOUND - params were:', Object.keys(allParams))
     return NextResponse.redirect(
       `${process.env.NEXT_PUBLIC_APP_URL}/login?error=no_code`
     )
   }
 
   try {
-    // Exchange insforge_code for tokens
+    console.log('🔥 Exchanging code for tokens...')
+    
+    // Exchange code for tokens
     const tokenResponse = await fetch(
       `${process.env.NEXT_PUBLIC_INSFORGE_URL}/auth/v1/token?grant_type=authorization_code`,
       {
@@ -35,11 +44,11 @@ export async function GET(request: NextRequest) {
           'Content-Type': 'application/json',
           apikey: process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY!,
         },
-        body: JSON.stringify({ code: insforgeCode }),
+        body: JSON.stringify({ code: authCode }),
       }
     )
 
-    console.log('Token exchange response:', tokenResponse.status)
+    console.log('🔥 Token response status:', tokenResponse.status)
 
     const tokenData = await tokenResponse.json()
 
@@ -73,10 +82,10 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    console.log('OAuth successful, redirecting to dashboard')
+    console.log('✅ OAuth successful, redirecting to dashboard')
     return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/dashboard`)
   } catch (err) {
-    console.error('OAuth callback error:', err)
+    console.error('❌ OAuth callback error:', err)
     return NextResponse.redirect(
       `${process.env.NEXT_PUBLIC_APP_URL}/login?error=auth_failed`
     )
