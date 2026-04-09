@@ -7,18 +7,43 @@ export default async function CallbackPage({
   searchParams: { [key: string]: string | string[] | undefined }
 }) {
   try {
-    // 🔥 Tokens vienen en la URL
-    const accessToken = searchParams.access_token as string
-    const refreshToken = searchParams.refresh_token as string
+    const code = searchParams.code as string
 
-    if (!accessToken || !refreshToken) {
-      throw new Error('No tokens in callback URL')
+    if (!code) {
+      throw new Error('No code in callback')
     }
 
-    // 🔥 Guardar cookies (CLAVE)
+    // 🔥 LLAMADA DIRECTA A INSFORGE
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_INSFORGE_URL}/auth/v1/token?grant_type=authorization_code`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY!,
+        },
+        body: JSON.stringify({
+          code,
+        }),
+      }
+    )
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      throw new Error('Failed to exchange code')
+    }
+
+    const accessToken = data.access_token
+    const refreshToken = data.refresh_token
+
+    if (!accessToken || !refreshToken) {
+      throw new Error('Missing tokens')
+    }
+
+    // 🔥 GUARDAR COOKIES
     await setAuthCookies(accessToken, refreshToken)
 
-    // 🔥 Redirigir
     redirect('/dashboard')
 
   } catch (err) {
