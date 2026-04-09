@@ -23,7 +23,9 @@ export default async function CallbackPage({
       throw new Error('No code in callback')
     }
 
-    // 🔥 Validación de ENV (pro)
+    console.log('CODE:', code)
+
+    // 🔥 Validación de ENV
     if (!process.env.NEXT_PUBLIC_INSFORGE_URL) {
       throw new Error('Missing INSFORGE URL')
     }
@@ -45,24 +47,41 @@ export default async function CallbackPage({
       }
     )
 
-    if (!res.ok) {
-      const errorText = await res.text()
-      throw new Error(`Token exchange failed: ${errorText}`)
+    // 🔥 DEBUG CLAVE
+    console.log('STATUS:', res.status)
+
+    const text = await res.text()
+    console.log('RAW RESPONSE:', text)
+
+    let data
+    try {
+      data = JSON.parse(text)
+    } catch {
+      throw new Error('Response is not JSON')
     }
 
-    const data = await res.json()
+    if (!res.ok) {
+      throw new Error(`Token exchange failed: ${text}`)
+    }
 
     const accessToken = data.access_token
     const refreshToken = data.refresh_token
+
+    console.log('TOKENS:', {
+      accessToken,
+      refreshToken,
+    })
 
     if (!accessToken || !refreshToken) {
       throw new Error('Missing tokens in response')
     }
 
-    // 🔥 Guardar cookies (clave para SSR)
+    // 🔥 Guardar cookies
     await setAuthCookies(accessToken, refreshToken)
 
-    // 🔥 Redirigir a dashboard
+    console.log('COOKIES SET')
+
+    // 🔥 Redirigir
     redirect('/dashboard')
   } catch (err) {
     console.error('OAuth Callback Error:', err)
