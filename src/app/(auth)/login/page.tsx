@@ -89,10 +89,12 @@ export default function LoginPage() {
 
   const handleGoogleSignIn = async () => {
     try {
+      console.log('Starting Google OAuth...')
       await insforge.auth.signInWithOAuth({
         provider: 'google',
-        redirectTo: `${window.location.origin}/callback`,
       })
+      // After OAuth, redirect to dashboard
+      router.push('/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Google sign in failed')
     }
@@ -100,10 +102,12 @@ export default function LoginPage() {
 
   const handleFacebookSignIn = async () => {
     try {
+      console.log('Starting Facebook OAuth...')
       await insforge.auth.signInWithOAuth({
         provider: 'facebook',
-        redirectTo: `${window.location.origin}/callback`,
       })
+      // After OAuth, redirect to dashboard
+      router.push('/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Facebook sign in failed')
     }
