@@ -90,11 +90,18 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     try {
       console.log('Starting Google OAuth with SDK')
-      // SDK maneja el redirect completo
+      // El SDK maneja OAuth completamente
+      // Shared Keys: el SDK redirige todo a Insforge
+      // Insforge autentica y vuelve con sesión guardada
       await insforge.auth.signInWithOAuth({
         provider: 'google',
       })
-      // SDK debería redirigir automáticamente
+      // No necesitamos redirect manual
+      // El SDK debería recargar la página o detectar sesión
+      // Espera 2 segundos y refresca
+      setTimeout(() => {
+        window.location.href = '/dashboard'
+      }, 2000)
     } catch (err) {
       console.error('Google sign in error:', err)
       setError(err instanceof Error ? err.message : 'Google sign in failed')
@@ -104,11 +111,15 @@ export default function LoginPage() {
   const handleFacebookSignIn = async () => {
     try {
       console.log('Starting Facebook OAuth with SDK')
-      // SDK maneja el redirect completo
+      // El SDK maneja OAuth completamente
       await insforge.auth.signInWithOAuth({
         provider: 'facebook',
       })
-      // SDK debería redirigir automáticamente
+      // No necesitamos redirect manual
+      // Espera 2 segundos y refresca
+      setTimeout(() => {
+        window.location.href = '/dashboard'
+      }, 2000)
     } catch (err) {
       console.error('Facebook sign in error:', err)
       setError(err instanceof Error ? err.message : 'Facebook sign in failed')
