@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { redirect } from 'next/navigation'
-import { setAuthCookies } from '@/lib/auth'
+import { setAuthCookiesAction } from '@/app/actions/auth'
 
 export default async function CallbackPage({
   searchParams,
@@ -9,6 +9,9 @@ export default async function CallbackPage({
   searchParams: { [key: string]: string | string[] | undefined }
 }) {
   try {
+    // 🔥 DEBUG: Log todos los searchParams para ver qué llega
+    console.log('CALLBACK RECEIVED - ALL PARAMS:', JSON.stringify(searchParams, null, 2))
+
     // 🔥 Obtener code correctamente tipado
     const codeParam = searchParams.code
 
@@ -19,7 +22,10 @@ export default async function CallbackPage({
         ? codeParam[0]
         : null
 
+    console.log('CODE EXTRACTED:', code)
+
     if (!code) {
+      console.log('ERROR: No code found. Available params:', Object.keys(searchParams))
       throw new Error('No code in callback')
     }
 
@@ -77,7 +83,7 @@ export default async function CallbackPage({
     }
 
     // 🔥 Guardar cookies
-    await setAuthCookies(accessToken, refreshToken)
+    await setAuthCookiesAction(accessToken, refreshToken)
 
     console.log('COOKIES SET')
 
