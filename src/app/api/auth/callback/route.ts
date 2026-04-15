@@ -1,93 +1,53 @@
-import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import { NextRequest, NextResponse } from 'next/server'
+import { createServerClient } from '@/lib/insforge'
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  
-  // Debug: log TODO lo que llega
-  const allParams = Object.fromEntries(searchParams.entries())
-  console.log('🔥 CALLBACK DEBUG - ALL PARAMS:', JSON.stringify(allParams, null, 2))
-  console.log('🔥 FULL URL:', request.url)
-  
-  const insforgeCode = searchParams.get('insforge_code')
-  const code = searchParams.get('code')
-  const error = searchParams.get('error')
+  const params = request.nextUrl.searchParams
+  const code = params.get('insforge_code') ?? params.get('code')
+  const oauthError = params.get('error')
 
-  console.log('🔥 PARSED:', { insforgeCode, code, error })
-
-  if (error) {
-    console.error('OAuth error:', error)
+  if (oauthError || !code) {
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/login?error=${error}`
+      new URL(`/login?error=${oauthError ?? 'oauth_failed'}`, request.url)
     )
   }
 
-  // Try insforge_code first, then code
-  const authCode = insforgeCode || code
+  const cookieStore = await cookies()
+  const codeVerifier = cookieStore.get('insforge_code_verifier')?.value
 
-  if (!authCode) {
-    console.error('❌ NO CODE FOUND - params were:', Object.keys(allParams))
+  if (!codeVerifier) {
+    return NextResponse.redirect(new URL('/login?error=missing_verifier', request.url))
+  }
+
+  const insforge = createServerClient()
+  const { data, error } = await insforge.auth.exchangeOAuthCode(code, codeVerifier)
+
+  if (error || !data?.accessToken) {
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/login?error=no_code`
+      new URL(`/login?error=${encodeURIComponent(error?.message ?? 'exchange_failed')}`, request.url)
     )
   }
 
-  try {
-    console.log('🔥 Exchanging code for tokens...')
-    
-    // Exchange code for tokens
-    const tokenResponse = await fetch(
-      `${process.env.NEXT_PUBLIC_INSFORGE_URL}/auth/v1/token?grant_type=authorization_code`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY!,
-        },
-        body: JSON.stringify({ code: authCode }),
-      }
-    )
+  cookieStore.set('accessToken', data.accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 7,
+  })
 
-    console.log('🔥 Token response status:', tokenResponse.status)
-
-    const tokenData = await tokenResponse.json()
-
-    if (!tokenResponse.ok) {
-      throw new Error(`Token exchange failed: ${JSON.stringify(tokenData)}`)
-    }
-
-    const { access_token, refresh_token } = tokenData
-
-    if (!access_token) {
-      throw new Error('No access token in response')
-    }
-
-    // Set cookies
-    const cookieStore = await cookies()
-    cookieStore.set('accessToken', access_token, {
+  if (data.refreshToken) {
+    cookieStore.set('refreshToken', data.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7,
       path: '/',
+      maxAge: 60 * 60 * 24 * 30,
     })
-
-    if (refresh_token) {
-      cookieStore.set('refreshToken', refresh_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 30,
-        path: '/',
-      })
-    }
-
-    console.log('✅ OAuth successful, redirecting to dashboard')
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/dashboard`)
-  } catch (err) {
-    console.error('❌ OAuth callback error:', err)
-    return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/login?error=auth_failed`
-    )
   }
+
+  cookieStore.delete('insforge_code_verifier')
+
+  return NextResponse.redirect(new URL('/dashboard', request.url))
 }
