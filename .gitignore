@@ -15,3 +15,5 @@
 .windsurf
 node_modules
 .next
+.env.local
+.env

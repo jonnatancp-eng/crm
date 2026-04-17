@@ -93,37 +93,37 @@ export function useLead(id: string) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
+  const fetchLead = useCallback(async () => {
     if (!id) return
 
-    const fetchLead = async () => {
-      setLoading(true)
-      try {
-        const { data: result, error: err } = await insforge.database
-          .from('leads')
-          .select(`
-            *,
-            owner:users!leads_owner_id_fkey(id, name, avatar_url, role),
-            tasks(*, assignee:users!tasks_assigned_to_fkey(id, name, avatar_url)),
-            notes(*, author:users!notes_created_by_fkey(id, name, avatar_url)),
-            deals(*)
-          `)
-          .eq('id', id)
-          .single()
+    setLoading(true)
+    try {
+      const { data: result, error: err } = await insforge.database
+        .from('leads')
+        .select(`
+          *,
+          owner:users!leads_owner_id_fkey(id, name, avatar_url, role),
+          tasks(*, assignee:users!tasks_assigned_to_fkey(id, name, avatar_url)),
+          notes(*, author:users!notes_created_by_fkey(id, name, avatar_url)),
+          deals(*)
+        `)
+        .eq('id', id)
+        .single()
 
-        if (err) throw err
-        setData(result as LeadWithDetails)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error fetching lead')
-      } finally {
-        setLoading(false)
-      }
+      if (err) throw err
+      setData(result as LeadWithDetails)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error fetching lead')
+    } finally {
+      setLoading(false)
     }
-
-    fetchLead()
   }, [id])
 
-  return { data, loading, error }
+  useEffect(() => {
+    fetchLead()
+  }, [fetchLead])
+
+  return { data, loading, error, refetch: fetchLead }
 }
 
 export function useLeadMutations() {

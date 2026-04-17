@@ -9,7 +9,7 @@
 export type UserRole = 'admin' | 'setter' | 'closer'
 export type TenantPlan = 'free' | 'pro' | 'enterprise'
 
-export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'lost'
+export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'won' | 'lost'
 export type LeadSource = 'website' | 'referral' | 'ads' | 'organic' | 'cold' | 'other'
 
 export type DealStage = 'lead' | 'contacted' | 'qualified' | 'scheduled' | 'closed_won' | 'closed_lost'
@@ -43,6 +43,7 @@ export interface User {
   id: string
   tenant_id: string
   name: string | null
+  email: string | null
   avatar_url: string | null
   role: UserRole
   is_active: boolean

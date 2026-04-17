@@ -20,7 +20,7 @@ import { PipelineColumn } from './pipeline-column'
 interface PipelineBoardProps {
   tenantId: string
   onDealClick?: (deal: DealWithOwner) => void
-  onWonTransition?: (deal: DealWithOwner, alreadyHasDeal: boolean, dealOfferDeclined: boolean) => void
+  onWonTransition?: (deal: DealWithOwner) => void
 }
 
 const STAGES: { id: DealStage; label: string }[] = [

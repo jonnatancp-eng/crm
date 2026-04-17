@@ -1,12 +1,4 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/api/auth/callback/route": "app/api/auth/callback/route.js",
   "/page": "app/page.js",
-  "/dashboard/deals/page": "app/dashboard/deals/page.js",
-  "/dashboard/page": "app/dashboard/page.js",
-  "/dashboard/pipeline/page": "app/dashboard/pipeline/page.js",
-  "/dashboard/settings/page": "app/dashboard/settings/page.js",
-  "/dashboard/tasks/page": "app/dashboard/tasks/page.js",
-  "/dashboard/leads/page": "app/dashboard/leads/page.js",
   "/(auth)/login/page": "app/(auth)/login/page.js"
 }

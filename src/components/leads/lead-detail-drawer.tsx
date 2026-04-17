@@ -174,9 +174,9 @@ export function LeadDetailDrawer({ leadId, open, onClose, onCreateDeal, onRefetc
               )}
 
               {/* Notes */}
-              {lead.notes && (
+              {(lead.notes as unknown as string) && (
                 <Section title="Notas">
-                  <p className="text-sm text-gray-600 whitespace-pre-wrap">{lead.notes}</p>
+                  <p className="text-sm text-gray-600 whitespace-pre-wrap">{lead.notes as unknown as string}</p>
                 </Section>
               )}
 
@@ -219,7 +219,7 @@ export function LeadDetailDrawer({ leadId, open, onClose, onCreateDeal, onRefetc
                   <InfoRow
                     icon={User}
                     label="Asignado a"
-                    value={lead.owner.name}
+                    value={lead.owner.name || '-'}
                   />
                 )}
               </Section>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useTenantRealtime } from '@/hooks/use-realtime'
+import { useDealMutations } from '@/hooks/use-crm'
 import { PipelineBoard } from '@/components/pipeline/pipeline-board'
 import { CreateDealDialog } from '@/components/deals/create-deal-dialog'
 import type { DealWithOwner, LeadWithDetails } from '@/types'
@@ -10,7 +11,6 @@ export default function PipelinePage() {
   const [selectedDeal, setSelectedDeal] = useState<DealWithOwner | null>(null)
   const [createDealOpen, setCreateDealOpen] = useState(false)
   const [createDealLead, setCreateDealLead] = useState<LeadWithDetails | null>(null)
-  const { updateDealStage } = useDealMutations()
   const [refetchKey, setRefetchKey] = useState(0)
 
   const tenantId = 'current-tenant'

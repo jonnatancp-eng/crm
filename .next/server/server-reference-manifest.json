@@ -1,1 +1,30 @@
-{"node":{"a609eef522aaac8bda4cce6f0552b3acf8ddeb00":{"workers":{"app/(auth)/login/page":"63435"},"layer":{"app/(auth)/login/page":"action-browser"}},"b1d9d77dac39c096172386fb7ea296d0c2593de8":{"workers":{"app/(auth)/login/page":"63435"},"layer":{"app/(auth)/login/page":"action-browser"}},"c6fef1be38a876ac5f214bd6cf20fe32a3f89e86":{"workers":{"app/(auth)/login/page":"63435"},"layer":{"app/(auth)/login/page":"action-browser"}}},"edge":{},"encryptionKey":"92D8tsM/XyCylBPf3rAcbDft6XFKSVQKIhxqcyfFIVY="}
+{
+  "node": {
+    "a609eef522aaac8bda4cce6f0552b3acf8ddeb00": {
+      "workers": {
+        "app/(auth)/login/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fjonnatancontreras%2FDocuments%2FJonnatan%2Fproyectos%2FClaude%2FCRM%2Fcrm%2Fsrc%2Fapp%2Factions%2Fauth.ts%22%2C%5B%22setAuthCookiesAction%22%2C%22clearAuthCookiesAction%22%2C%22initiateOAuthAction%22%5D%5D%5D&__client_imported__=true!"
+      },
+      "layer": {
+        "app/(auth)/login/page": "action-browser"
+      }
+    },
+    "b1d9d77dac39c096172386fb7ea296d0c2593de8": {
+      "workers": {
+        "app/(auth)/login/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fjonnatancontreras%2FDocuments%2FJonnatan%2Fproyectos%2FClaude%2FCRM%2Fcrm%2Fsrc%2Fapp%2Factions%2Fauth.ts%22%2C%5B%22setAuthCookiesAction%22%2C%22clearAuthCookiesAction%22%2C%22initiateOAuthAction%22%5D%5D%5D&__client_imported__=true!"
+      },
+      "layer": {
+        "app/(auth)/login/page": "action-browser"
+      }
+    },
+    "c6fef1be38a876ac5f214bd6cf20fe32a3f89e86": {
+      "workers": {
+        "app/(auth)/login/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fjonnatancontreras%2FDocuments%2FJonnatan%2Fproyectos%2FClaude%2FCRM%2Fcrm%2Fsrc%2Fapp%2Factions%2Fauth.ts%22%2C%5B%22setAuthCookiesAction%22%2C%22clearAuthCookiesAction%22%2C%22initiateOAuthAction%22%5D%5D%5D&__client_imported__=true!"
+      },
+      "layer": {
+        "app/(auth)/login/page": "action-browser"
+      }
+    }
+  },
+  "edge": {},
+  "encryptionKey": "7XM4ur8Eo3o2xw7xogEZlf8pgX/n5UyFQzJjuT3QD6A="
+}
