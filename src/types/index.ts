@@ -300,6 +300,44 @@ export interface LeadFilters {
   date_to?: string
 }
 
+// =====================================================
+// Closed Deal Types (won leads)
+// =====================================================
+
+export interface ClosedDeal {
+  id: string
+  tenant_id: string
+  lead_id: string | null
+  assigned_to: string
+  value: number | null
+  notes: string | null
+  voided: boolean
+  voided_reason: string | null
+  closed_at: string
+  created_at: string
+}
+
+export interface ClosedDealWithRelations extends ClosedDeal {
+  lead?: Lead | null
+  assigned_to_user?: User | null
+}
+
+export interface CreateClosedDealInput {
+  lead_id: string
+  value?: number
+  notes?: string
+}
+
+// =====================================================
+// Won Transition Response
+// =====================================================
+
+export interface WonTransitionResponse {
+  alreadyHasDeal: boolean
+  dealOfferDeclined: boolean
+  showDealPrompt: boolean
+}
+
 export interface TaskFilters {
   status?: TaskStatus[]
   priority?: TaskPriority[]
@@ -365,6 +403,7 @@ export const LEAD_STATUSES: { value: LeadStatus; label: string; color: string }[
   { value: 'contacted', label: 'Contactado', color: 'bg-yellow-500' },
   { value: 'qualified', label: 'Calificado', color: 'bg-purple-500' },
   { value: 'converted', label: 'Convertido', color: 'bg-green-500' },
+  { value: 'won', label: 'Ganado', color: 'bg-green-600' },
   { value: 'lost', label: 'Perdido', color: 'bg-gray-500' },
 ]
 

@@ -271,6 +271,18 @@ async function handleStageUpdate(insforge: ReturnType<typeof createClient>, req:
     })
   }
 
+  // Get current deal (with lead_id) before updating
+  const { data: currentDeal } = await insforge.database
+    .from('deals')
+    .select('id, lead_id, stage')
+    .eq('id', dealId)
+    .single()
+
+  if (!currentDeal) {
+    return new Response(JSON.stringify({ error: 'Deal not found' }), { status: 404 })
+  }
+
+  // Update deal stage
   const { data, error } = await insforge.database
     .from('deals')
     .update({ stage: body.stage })
@@ -285,7 +297,46 @@ async function handleStageUpdate(insforge: ReturnType<typeof createClient>, req:
     })
   }
 
-  return new Response(JSON.stringify({ data }), {
+  // If moving to closed_won and deal has a lead, update lead status to 'won'
+  if (body.stage === 'closed_won' && currentDeal.lead_id) {
+    await insforge.database
+      .from('leads')
+      .update({ status: 'won' })
+      .eq('id', currentDeal.lead_id)
+      .eq('status', 'qualified') // Only if currently qualified (not already won)
+  }
+
+  // Check if lead already has a closed_deal (for the response)
+  let alreadyHasDeal = false
+  let dealOfferDeclined = false
+
+  if (currentDeal.lead_id) {
+    const { data: leadData } = await insforge.database
+      .from('leads')
+      .select('deal_offer_declined')
+      .eq('id', currentDeal.lead_id)
+      .single()
+
+    if (leadData) {
+      dealOfferDeclined = leadData.deal_offer_declined === true
+    }
+
+    const { data: closedDeal } = await insforge.database
+      .from('closed_deals')
+      .select('id')
+      .eq('lead_id', currentDeal.lead_id)
+      .eq('voided', false)
+      .single()
+
+    alreadyHasDeal = !!closedDeal
+  }
+
+  return new Response(JSON.stringify({
+    data,
+    alreadyHasDeal,
+    dealOfferDeclined,
+    showDealPrompt: !alreadyHasDeal && !dealOfferDeclined,
+  }), {
     status: 200,
     headers: { 'Content-Type': 'application/json' }
   })

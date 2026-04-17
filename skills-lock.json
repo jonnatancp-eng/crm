@@ -9,17 +9,22 @@
     "insforge": {
       "source": "insforge/agent-skills",
       "sourceType": "github",
-      "computedHash": "a9370ea5c4ae6a47f11d2c83b7883d996664e797529265fb10fa237a7e093bd9"
+      "computedHash": "49ab9b9c520206022efc851c7dd4b81eed3d40428f123ed2c6213d5a127bde62"
     },
     "insforge-cli": {
       "source": "insforge/agent-skills",
       "sourceType": "github",
-      "computedHash": "e497f1bbeecee19170f5c39341629bdcfcce482ab989c4cff9456e44ae029f4c"
+      "computedHash": "9eefd32f8ed7195969d5fac788baa7ef99b452892e5ea9b00eb65e08a3ebece6"
     },
     "insforge-debug": {
       "source": "insforge/agent-skills",
       "sourceType": "github",
-      "computedHash": "4c46cf483f3e32d1b0ff4c7d7b1f571eb973f111a851a6e5a01610b267298ec5"
+      "computedHash": "f1f20f82cba657771767c563480f07efd3ab633566ccdcfccebce26039bbfce2"
+    },
+    "insforge-integrations": {
+      "source": "insforge/agent-skills",
+      "sourceType": "github",
+      "computedHash": "421b6eb1091930a437c223aae1d6547f3ee4d2e5cfef45e41a3e2b32a2c27f7e"
     }
   }
 }

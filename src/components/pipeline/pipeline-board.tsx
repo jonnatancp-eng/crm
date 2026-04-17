@@ -20,6 +20,7 @@ import { PipelineColumn } from './pipeline-column'
 interface PipelineBoardProps {
   tenantId: string
   onDealClick?: (deal: DealWithOwner) => void
+  onWonTransition?: (deal: DealWithOwner, alreadyHasDeal: boolean, dealOfferDeclined: boolean) => void
 }
 
 const STAGES: { id: DealStage; label: string }[] = [
@@ -31,7 +32,7 @@ const STAGES: { id: DealStage; label: string }[] = [
   { id: 'closed_lost', label: 'Perdido' },
 ]
 
-export function PipelineBoard({ tenantId, onDealClick }: PipelineBoardProps) {
+export function PipelineBoard({ tenantId, onDealClick, onWonTransition }: PipelineBoardProps) {
   const { data, loading, refetch } = usePipeline()
   const { updateDealStage } = useDealMutations()
   const [activeDeal, setActiveDeal] = useState<DealWithOwner | null>(null)
@@ -61,7 +62,6 @@ export function PipelineBoard({ tenantId, onDealClick }: PipelineBoardProps) {
     const dealId = active.id as string
     const newStage = over.id as DealStage
 
-    // Find the deal
     const deal = Object.values(data)
       .flat()
       .find(d => d.id === dealId)
@@ -69,8 +69,20 @@ export function PipelineBoard({ tenantId, onDealClick }: PipelineBoardProps) {
     if (!deal || deal.stage === newStage) return
 
     try {
-      await updateDealStage(dealId, newStage)
-      refetch()
+      if (newStage === 'closed_won' && onWonTransition) {
+        onWonTransition(deal)
+      } else {
+        const res = await fetch(`/functions/api/deals?id=${dealId}&action=stage`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ stage: newStage }),
+        })
+        if (!res.ok) {
+          const json = await res.json()
+          throw new Error(json.error)
+        }
+        refetch()
+      }
     } catch (error) {
       console.error('Failed to update deal stage:', error)
     }

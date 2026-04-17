@@ -14,6 +14,7 @@ import {
   Menu,
   X,
   ChevronDown,
+  DollarSign,
 } from 'lucide-react'
 
 interface DashboardLayoutProps {
@@ -30,6 +31,7 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Pipeline', href: '/dashboard/pipeline', icon: Kanban },
   { name: 'Leads', href: '/dashboard/leads', icon: Users },
+  { name: 'Negocios', href: '/dashboard/deals', icon: DollarSign },
   { name: 'Tareas', href: '/dashboard/tasks', icon: CheckSquare },
   { name: 'Configuración', href: '/dashboard/settings', icon: Settings },
 ]

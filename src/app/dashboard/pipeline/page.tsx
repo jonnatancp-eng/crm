@@ -3,20 +3,71 @@
 import { useState } from 'react'
 import { useTenantRealtime } from '@/hooks/use-realtime'
 import { PipelineBoard } from '@/components/pipeline/pipeline-board'
-import type { DealWithOwner } from '@/types'
+import { CreateDealDialog } from '@/components/deals/create-deal-dialog'
+import type { DealWithOwner, LeadWithDetails } from '@/types'
 
 export default function PipelinePage() {
   const [selectedDeal, setSelectedDeal] = useState<DealWithOwner | null>(null)
+  const [createDealOpen, setCreateDealOpen] = useState(false)
+  const [createDealLead, setCreateDealLead] = useState<LeadWithDetails | null>(null)
+  const { updateDealStage } = useDealMutations()
+  const [refetchKey, setRefetchKey] = useState(0)
 
-  // Get tenant from session (simplified for demo)
-  const tenantId = 'current-tenant' // This would come from auth context
+  const tenantId = 'current-tenant'
 
   useTenantRealtime({
     tenantId,
-    onDealChange: () => {
-      // Refresh handled by React Query invalidation
-    },
+    onDealChange: () => {},
   })
+
+  const handleDealClick = (deal: DealWithOwner) => {
+    setSelectedDeal(deal)
+  }
+
+  const handleWonTransition = async (deal: DealWithOwner) => {
+    try {
+      const res = await fetch(`/functions/api/deals?id=${deal.id}&action=stage`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stage: 'closed_won' }),
+      })
+      const json = await res.json()
+
+      if (!res.ok) throw new Error(json.error)
+
+      const { alreadyHasDeal, dealOfferDeclined } = json
+
+      if (alreadyHasDeal || dealOfferDeclined) return
+
+      if (deal.lead_id) {
+        const leadRes = await fetch(`/functions/api/leads?id=${deal.lead_id}`)
+        const leadJson = await leadRes.json()
+        if (leadRes.ok && leadJson.data) {
+          setCreateDealLead(leadJson.data)
+          setCreateDealOpen(true)
+        }
+      }
+    } catch (err) {
+      console.error('Failed to transition deal to won:', err)
+    }
+  }
+
+  const handleCreateDeal = (lead: LeadWithDetails) => {
+    setCreateDealLead(lead)
+    setCreateDealOpen(true)
+  }
+
+  const handleDealCreated = (_dealId: string) => {
+    setCreateDealOpen(false)
+    setCreateDealLead(null)
+    setRefetchKey(k => k + 1)
+  }
+
+  const handleDealDeclined = (_leadId: string) => {
+    setCreateDealOpen(false)
+    setCreateDealLead(null)
+    setRefetchKey(k => k + 1)
+  }
 
   return (
     <div className="h-[calc(100vh-8rem)]">
@@ -26,10 +77,11 @@ export default function PipelinePage() {
       </div>
       <PipelineBoard
         tenantId={tenantId}
-        onDealClick={(deal) => setSelectedDeal(deal)}
+        key={refetchKey}
+        onDealClick={handleDealClick}
+        onWonTransition={handleWonTransition}
       />
 
-      {/* TODO: Add deal detail modal */}
       {selectedDeal && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white rounded-lg shadow-xl max-w-lg w-full p-6">
@@ -43,6 +95,19 @@ export default function PipelinePage() {
             </button>
           </div>
         </div>
+      )}
+
+      {createDealLead && (
+        <CreateDealDialog
+          lead={createDealLead}
+          open={createDealOpen}
+          onClose={() => {
+            setCreateDealOpen(false)
+            setCreateDealLead(null)
+          }}
+          onCreated={handleDealCreated}
+          onDeclined={handleDealDeclined}
+        />
       )}
     </div>
   )

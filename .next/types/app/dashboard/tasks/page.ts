@@ -1,4 +1,4 @@
-// File: C:\Users\JONN\Documents\Jonnatan\Jonnatan\IA Agency\crm\src\app\dashboard\tasks\page.tsx
+// File: /Users/jonnatancontreras/Documents/Jonnatan/proyectos/Claude/CRM/crm/src/app/dashboard/tasks/page.tsx
 import * as entry from '../../../../../src/app/dashboard/tasks/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

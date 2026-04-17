@@ -6,6 +6,13 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { insforge } from '@/lib/insforge'
+
+// Helper to get access token from cookie (client-side only)
+function getAccessToken(): string {
+  if (typeof window === 'undefined') return ''
+  const cookies = document.cookie.split(';').find(c => c.trim().startsWith('accessToken='))
+  return cookies?.split('=')[1] || ''
+}
 import type {
   Lead, LeadWithOwner, LeadWithDetails,
   Deal, DealWithOwner,
@@ -18,6 +25,7 @@ import type {
   CreateDealInput, UpdateDealInput,
   CreateTaskInput, UpdateTaskInput,
   CreateNoteInput,
+  ClosedDeal, ClosedDealWithRelations, CreateClosedDealInput,
 } from '@/types'
 
 // =====================================================
@@ -285,16 +293,25 @@ export function useDealMutations() {
     return data as Deal
   }
 
-  const updateDealStage = async (id: string, stage: string): Promise<Deal> => {
-    const { data, error } = await insforge.database
-      .from('deals')
-      .update({ stage })
-      .eq('id', id)
-      .select()
-      .single()
+  const updateDealStage = async (id: string, stage: string) => {
+    const res = await fetch('/functions/api/deals?action=stage', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getAccessToken()}`,
+      },
+      body: JSON.stringify({ stage }),
+    })
 
-    if (error) throw error
-    return data as Deal
+    const json = await res.json()
+    if (!res.ok) throw new Error(json.error || 'Failed to update deal stage')
+
+    return {
+      deal: json.data as Deal,
+      alreadyHasDeal: json.alreadyHasDeal ?? false,
+      dealOfferDeclined: json.dealOfferDeclined ?? false,
+      showDealPrompt: json.showDealPrompt ?? false,
+    }
   }
 
   const deleteDeal = async (id: string): Promise<void> => {
@@ -590,4 +607,74 @@ export function useAssignmentRules() {
   }, [])
 
   return { data, loading, error }
+}
+
+// =====================================================
+// Closed Deals Hook
+// =====================================================
+
+export function useClosedDeals() {
+  const [data, setData] = useState<ClosedDealWithRelations[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchClosedDeals = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const { data: result, error: err } = await insforge.database
+        .from('closed_deals')
+        .select(`
+          *,
+          lead:leads!closed_deals_lead_id_fkey(id, name, email, phone, company),
+          assigned_to_user:users!closed_deals_assigned_to_fkey(id, name, avatar_url, role)
+        `)
+        .eq('voided', false)
+        .order('closed_at', { ascending: false })
+
+      if (err) throw err
+      setData(result as ClosedDealWithRelations[])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error fetching closed deals')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchClosedDeals()
+  }, [fetchClosedDeals])
+
+  return { data, loading, error, refetch: fetchClosedDeals }
+}
+
+export function useClosedDealMutations() {
+  const createClosedDeal = async (input: CreateClosedDealInput): Promise<ClosedDeal> => {
+    const { data, error } = await insforge.database
+      .from('closed_deals')
+      .insert([{
+        lead_id: input.lead_id,
+        value: input.value || null,
+        notes: input.notes || null,
+        voided: false,
+        voided_reason: null,
+      }])
+      .select()
+      .single()
+
+    if (error) throw error
+    return data as ClosedDeal
+  }
+
+  const voidClosedDeal = async (id: string, reason?: string): Promise<void> => {
+    const { error } = await insforge.database
+      .from('closed_deals')
+      .update({ voided: true, voided_reason: reason || 'User cancelled' })
+      .eq('id', id)
+
+    if (error) throw error
+  }
+
+  return { createClosedDeal, voidClosedDeal }
 }
