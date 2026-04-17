@@ -27,11 +27,11 @@ interface DashboardLayoutProps {
 }
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Pipeline', href: '/pipeline', icon: Kanban },
-  { name: 'Leads', href: '/leads', icon: Users },
-  { name: 'Tareas', href: '/tasks', icon: CheckSquare },
-  { name: 'Configuración', href: '/settings', icon: Settings },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Pipeline', href: '/dashboard/pipeline', icon: Kanban },
+  { name: 'Leads', href: '/dashboard/leads', icon: Users },
+  { name: 'Tareas', href: '/dashboard/tasks', icon: CheckSquare },
+  { name: 'Configuración', href: '/dashboard/settings', icon: Settings },
 ]
 
 export function DashboardLayout({ children, user }: DashboardLayoutProps) {
@@ -147,7 +147,7 @@ export function DashboardLayout({ children, user }: DashboardLayoutProps) {
             {userMenuOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1">
                 <Link
-                  href="/settings"
+                  href="/dashboard/settings"
                   className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   onClick={() => setUserMenuOpen(false)}
                 >
